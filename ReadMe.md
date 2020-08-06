@@ -19,3 +19,10 @@ The FileRepository is the link to Blob Storage in this case. The IFileRepository
 ### Blob Storage Emulator ###
 
 The Storage account is configurable in the appsettings file or can be overridden on the environment. This demo works with a storage account in Azure but I have used azurite running in docker. 
+
+This project uses Azure.Storage.Blobs v12, which requires a secure connection. In order to satisfy these requirements I needed to create a certificate and provide it to Azurite at startup. This is the cer.pem and key.pem files in the root directory. I executed Azurite in Docker Desktop with the following command:
+
+```shell
+docker run -p 10000:10000 mcr.microsoft.com/azure-storage/azurite
+    azurite-blob --blobHost 0.0.0.0 --blobPort 10000 --oauth basic --cert cert.pem --key key.pem -v
+```
