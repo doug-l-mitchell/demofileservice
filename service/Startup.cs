@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
+using DemoFileService.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -25,6 +27,15 @@ namespace DemoFileService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddSwaggerGen();
+        
+            services.AddScoped<IFileRepository>(repo => {
+                // this could be more elegant but I'm pressed for time.
+                var cl = new BlobContainerClient(Configuration["storage:service"], Configuration["storage:container"]);
+                cl.CreateIfNotExists();
+                return new FileRepository(cl);
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -34,9 +45,11 @@ namespace DemoFileService
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DemoFileService"));
 
             app.UseEndpoints(endpoints =>
             {
